@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Billedgalleri</title>
+  </head>
+  <body>
+    <style>
+      .valgt {
+        background-color: red;
+      }
+      button {
+        border: none;
+        color: white;
+        padding: 8px 10px;
+        text-align: center;
+
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+
+      #holder {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1em;
+      }
+
+      article {
+        border: 1px solid orange;
+        border-radius: 10px;
+        padding: 1em;
+      }
+      img {
+        max-width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: contain;
+      }
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        padding: 20px;
+      }
+
+      #popop {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        background-color: #000000aa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* skjul  */
+        display: none;
+      }
+
+      #popop article {
+        width: 80%;
+        background-color: white;
+      }
+    </style>
+    <h1>Alle</h1>
+    <nav>
+      <button data-troende="alle" class="valgt">Alle</button>
+      <button data-troende="ja">Troende</button>
+      <button data-troende="nej">Ikke troende</button>
+      <button data-troende="tvivler">Tvivler</button>
+    </nav>
+    <main id="holder"></main>
+    <template>
+      <article>
+        <img src="" alt="" />
+        <h2 class="navn"></h2>
+        <p class="email"></p>
+        <p class="hobby"></p>
+        <p class="troende"></p>
+      </article>
+    </template>
+
+    <!-- pop up single view -->
+    <div id="popop">
+      <article>
+        <img class="" alt="" />
+        <h1></h1>
+        <p></p>
+      </article>
+    </div>
+
+    <script>
+      const url = "https://persongalleri-5d3e.restdb.io/rest/persongalleri";
+      const options = {
+        headers: {
+          "x-apikey": "600fe9211346a1524ff12e31",
+        },
+      };
+
+      document.addEventListener("DOMContentLoaded", start);
+      let personer;
+      let filter = "alle";
+      const header = document.querySelector("h1");
+
+      // første funktion der kaldes efter DOM er loadet
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) => knap.addEventListener("click", filtrerPersoner));
+        hentData();
+      }
+
+      function filtrerPersoner() {
+        // sæt variablen filter til værdien af data-troende på den knap
+        filter = this.dataset.troende;
+        // fjern klassen valgt
+        document.querySelector(".valgt").classList.remove("valgt");
+        // marker den knap der er klikket på
+        this.classList.add("valgt");
+        // kald funktionen visPersoner efter det nye filter er sat
+        visPersoner();
+        header.textContent = this.textContent;
+      }
+
+      async function hentData() {
+        const response = await fetch(url, options);
+        personer = await response.json();
+
+        visPersoner();
+      }
+
+      // funktion der viser personer i liste view
+      function visPersoner() {
+        const holder = document.querySelector("#holder");
+        const template = document.querySelector("template").content;
+
+        holder.textContent = "";
+        personer.forEach((person) => {
+          console.log("Troende", person.troende);
+          // loop igennem json(personer)
+          // tjek hvilken tro personen har og sammenlign med aktuelt filter, eller vis alle, hvis filter har værdien alle
+          if (filter == person.troende || filter == "alle") {
+            const klon = template.cloneNode(true);
+            klon.querySelector("img").src = "faces/" + person.billede;
+            // vælger artiklen
+            klon.querySelector("article").addEventListener("click", () => visPerson(person));
+            klon.querySelector(".navn").textContent = person.fornavn + " " + person.efternavn;
+            klon.querySelector(".email").innerHTML = "E-mail: " + person.email;
+            klon.querySelector(".hobby").innerHTML = "Hobby: " + person.hobby;
+            klon.querySelector(".troende").innerHTML = "Troende: " + person.troende;
+
+            holder.appendChild(klon);
+          }
+        });
+      }
+
+      document.querySelector("#popop").addEventListener("click", () => (popop.style.display = "none"));
+
+      // når personen bliver klikket på
+      function visPerson(personData) {
+        console.log(personData);
+        const popop = document.querySelector("#popop");
+        popop.style.display = "flex";
+        popop.querySelector("h1").textContent = personData.fornavn + " " + personData.efternavn;
+        popop.querySelector("img").src = "faces/" + personData.billede;
+      }
+      hentData();
+    </script>
+  </body>
+</html>

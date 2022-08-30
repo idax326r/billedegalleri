@@ -45,6 +45,13 @@
         },
       };
 
+      document.addEventListener("DOMContentLoaded", start);
+      let personer;
+      let filter = "ja";
+      function start() {
+        hentData();
+      }
+
       async function hentData() {
         const response = await fetch(url, options);
         const json = await response.json();
@@ -57,14 +64,16 @@
       function vis(personer) {
         // console.log(personer);
         personer.forEach((person) => {
-          const klon = template.cloneNode(true);
-          klon.querySelector("img").src = "faces/" + person.billede;
-          klon.querySelector(".navn").textContent = person.fornavn + " " + person.efternavn;
-          klon.querySelector(".email").innerHTML = "E-mail: " + person.email;
-          klon.querySelector(".hobby").innerHTML = "Hobby: " + person.hobby;
-          klon.querySelector(".troende").innerHTML = "Troende: " + person.troende;
+          if (filter == person.troende) {
+            const klon = template.cloneNode(true);
+            klon.querySelector("img").src = "faces/" + person.billede;
+            klon.querySelector(".navn").textContent = person.fornavn + " " + person.efternavn;
+            klon.querySelector(".email").innerHTML = "E-mail: " + person.email;
+            klon.querySelector(".hobby").innerHTML = "Hobby: " + person.hobby;
+            klon.querySelector(".troende").innerHTML = "Troende: " + person.troende;
 
-          holder.appendChild(klon);
+            holder.appendChild(klon);
+          }
         });
       }
       hentData();
